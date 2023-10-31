@@ -19,7 +19,7 @@ st.title('Car analysis')
 with st.expander("Data"):
         showData=st.multiselect('Filter: ',df.columns,default=list(df.columns))
         st.dataframe(df[showData],use_container_width=True)
-model_year_df = df.groupby(by= 'model_year')['price'].agg(['mean', 'count'])
+
 
 st.subheader('Vehicle :green[type] by :green[manufacturer]')
 fig_1 = pt.bar(df_manufacturer)
@@ -32,6 +32,25 @@ st.subheader('Histogram of :green[condition] vs :green[model year]')
 fig2 = pt.histogram(df, x = 'model_year', color = 'condition')
 st.plotly_chart(fig2)
 
+st.subheader('Distribuion of mean price vs model year')
+model_year_df = df.groupby(by= 'model_year')['price'].mean()
+fig_4 = pt.scatter(model_year_df,trendline = 'lowess')
+fig_4.update_layout(
+    xaxis_title = 'model year',
+    yaxis_title = 'price'
+)
+st.plotly_chart(fig_4)
+
+st.subheader('Distribuion of car mileage vs model year')
+df['odometer_adjusted'] = round(df['odometer']/1000)
+odometer_df = df.groupby('odometer_adjusted')['price'].mean()
+fig_5 = pt.scatter(odometer_df)
+fig_5.update_layout(
+    xaxis_title = 'odometer',
+    yaxis_title = 'mean price',
+    xaxis_ticksuffix = 'K'
+)
+st.plotly_chart(fig_5)
 
 st.subheader('Compare distribution between manufacturers')
 manufacturer_1 = st.selectbox('Select manufacturer 1', df['manufacturer'].unique(), key='1')
@@ -46,4 +65,8 @@ else:
     fig_3.add_trace(go.Histogram(x = df[df['manufacturer'] == manufacturer_2]['price'], name = manufacturer_2))
 fig_3.update_layout(barmode='overlay')
 fig_3.update_traces(opacity=0.75)
+fig_3.update_layout(
+    xaxis_title = 'price',
+    yaxis_title = 'count')
 st.plotly_chart(fig_3)
+
